@@ -12,6 +12,9 @@ public class GameBoardController : MonoBehaviour
     private int _height;
     [SerializeField]
     private GameObject _tilePrefab;
+
+    [SerializeField] private Transform _tileHolder;
+    [SerializeField] private Transform _itemHolder;
     
     [SerializeField] 
     private float _tweenDuration = 0.4f;
@@ -35,7 +38,7 @@ public class GameBoardController : MonoBehaviour
         {
             for (var y = 0; y < _height; y++)
             {
-                var tile = Instantiate(_tilePrefab, transform);
+                var tile = Instantiate(_tilePrefab, _tileHolder);
                 var tilePosition = new Vector2(x, y);
                 tile.transform.position = tilePosition;
             }
@@ -73,7 +76,7 @@ public class GameBoardController : MonoBehaviour
             item = _itemPrefabs[index];
         }
         
-        item = Instantiate(_itemPrefabs[index], transform);
+        item = Instantiate(_itemPrefabs[index], _itemHolder);
         item.transform.position = position;
 
         // Добавляем созданный элемент в массив

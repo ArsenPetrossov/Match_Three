@@ -16,4 +16,9 @@ public class Item : MonoBehaviour
         transform.localScale = Vector3.zero;
         transform.DOScale(itemScale, tweenDuration);
     }
+
+    public void MoveTo(Vector3 position,float tweenDuration)
+    {
+        transform.DOMove(position, tweenDuration);
+    }
 }

@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4277444567586248274}
   - component: {fileID: 7214266077743073828}
   - component: {fileID: 3836374547138943408}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: BlueSweet
   m_TagString: Untagged
   m_Icon: {fileID: 0}
