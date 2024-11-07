@@ -18,6 +18,6 @@ public class GameManager : MonoBehaviour
         _gameBoardController.Initialize(itemsSet, matchFinder);
 
         var items = _gameBoardController.CreateGameBoard();
-        _itemsMover.Initialize(items, gameBoardIndexProvider);
+        _itemsMover.Initialize(items, gameBoardIndexProvider, matchFinder);
     }
 }

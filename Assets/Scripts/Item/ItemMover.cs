@@ -12,32 +12,38 @@ public class ItemMover : MonoBehaviour
 
     private Vector2Int _firstItemPosition;
     private Vector2Int _secondItemPosition;
+    private MatchFinder _matchFinder;
+    private bool _isSwapping = false;
 
-    public void Initialize(Item[,] items, GameBoardIndexProvider gameBoardIndexProvider)
+    public void Initialize(Item[,] items, GameBoardIndexProvider gameBoardIndexProvider, MatchFinder matchFinder)
     {
         _items = items;
         _gameBoardIndexProvider = gameBoardIndexProvider;
+        _matchFinder = matchFinder;
     }
 
     private void Update()
     {
+        if (_isSwapping)
+            return;
+
         if (Input.GetMouseButtonDown(0))
         {
-            _firstItemPosition = GetItemPosition(_gameBoardIndexProvider);
+            _firstItemPosition = GetItemPosition();
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            _secondItemPosition = GetItemPosition(_gameBoardIndexProvider);
-
+            _secondItemPosition = GetItemPosition();
+            
             if (AreItemsAdjacent(_firstItemPosition, _secondItemPosition))
             {
-                SwapItems();
+                StartCoroutine(SwapAndCheck());
             }
         }
     }
 
-    private Vector2Int GetItemPosition(GameBoardIndexProvider gameBoardIndexProvider)
+    private Vector2Int GetItemPosition()
     {
         Vector2Int itemPosition = Vector2Int.zero;
         var mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -45,7 +51,7 @@ public class ItemMover : MonoBehaviour
         var hit = Physics2D.Raycast(mousePosition, Vector2.zero);
         if (hit.collider != null)
         {
-            itemPosition = gameBoardIndexProvider.GetIndex(mousePosition);
+            itemPosition = _gameBoardIndexProvider.GetIndex(mousePosition);
         }
 
         return itemPosition;
@@ -71,11 +77,36 @@ public class ItemMover : MonoBehaviour
         firstItem.Move(_secondItemPosition, _swapDuration);
         secondItem.Move(_firstItemPosition, _swapDuration);
 
-        // Меняем местами элементы в массиве _items:
         _items[_firstItemPosition.x, _firstItemPosition.y] = secondItem;
         _items[_secondItemPosition.x, _secondItemPosition.y] = firstItem;
 
-        // Сохраняем новые позиции в переменных:
         (_firstItemPosition, _secondItemPosition) = (_secondItemPosition, _firstItemPosition);
+    }
+
+    private IEnumerator SwapAndCheck()
+    {
+        _isSwapping = true;
+
+        SwapItems();
+        Debug.Log("Перемещаем обекты");
+        yield return new WaitForSeconds(_swapDuration);
+
+        bool matchFoundFirst = _matchFinder.HasMatchesAfterMove(_items, _firstItemPosition);
+        bool matchFoundSecond = _matchFinder.HasMatchesAfterMove(_items, _secondItemPosition);
+
+        if (!matchFoundFirst && !matchFoundSecond)
+        {
+            SwapItems();
+
+            yield return new WaitForSeconds(_swapDuration);
+            Debug.Log("Совпадений не найдено, элементы возвращены обратно.");
+        }
+        else
+        {
+            Debug.Log("Совпадения найдены, обрабатываем их.");
+            _matchFinder.HandleMatches(_items);
+        }
+
+        _isSwapping = false;
     }
 }
