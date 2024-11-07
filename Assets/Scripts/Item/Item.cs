@@ -17,8 +17,8 @@ public class Item : MonoBehaviour
         transform.DOScale(itemScale, tweenDuration);
     }
 
-    public void MoveTo(Vector3 position,float tweenDuration)
+    public void Move(Vector2Int position,float tweenDuration)
     {
-        transform.DOMove(position, tweenDuration);
+        transform.DOMove(new Vector3(position.x,position.y), tweenDuration);
     }
 }

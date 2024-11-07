@@ -5,17 +5,19 @@ using UnityEngine;
 /// </summary>
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] 
-    private ItemsSetProvider _itemsSetProvider;
-    [SerializeField] 
-    private GameBoardController _gameBoardController;
+    [SerializeField] private ItemsSetProvider _itemsSetProvider;
+    [SerializeField] private GameBoardController _gameBoardController;
+    [SerializeField] private ItemMover _itemsMover;
 
     private void Awake()
     {
         var matchFinder = new MatchFinder();
+        var gameBoardIndexProvider = new GameBoardIndexProvider(_gameBoardController);
         var itemsSet = _itemsSetProvider.GetItemsSet();
-        
+
         _gameBoardController.Initialize(itemsSet, matchFinder);
-        _gameBoardController.CreateGameBoard();
+
+        var items = _gameBoardController.CreateGameBoard();
+        _itemsMover.Initialize(items, gameBoardIndexProvider);
     }
 }

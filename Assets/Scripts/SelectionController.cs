@@ -29,15 +29,10 @@ public class SelectionController : MonoBehaviour
             _mouseEndPoint = Input.mousePosition;
 
             SelectItemInDirection(GetMovementDirection(_mouseStartPoint, _mouseEndPoint));
-            SwapItem();
         }
     }
 
-    public void SwapItem()
-    {
-        _selectedItem.GetComponent<Item>().MoveTo(_targetItemToMove.position,0.5f);
-        _targetItemToMove.GetComponent<Item>().MoveTo(_selectedItem.position,0.5f);
-    }
+   
     public void SelectItem()
     {
         Vector2 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);

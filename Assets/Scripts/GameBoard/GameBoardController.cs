@@ -6,18 +6,13 @@ using Random = UnityEngine.Random;
 /// </summary>
 public class GameBoardController : MonoBehaviour
 {
-    [SerializeField]
-    private int _width;
-    [SerializeField]
-    private int _height;
-    [SerializeField]
-    private GameObject _tilePrefab;
+    public float CellSize => _tilePrefab.transform.localScale.x;
 
-    [SerializeField] private Transform _tileHolder;
-    [SerializeField] private Transform _itemHolder;
-    
-    [SerializeField] 
-    private float _tweenDuration = 0.4f;
+    [SerializeField] private int _width;
+    [SerializeField] private int _height;
+    [SerializeField] private GameObject _tilePrefab;
+
+    [SerializeField] private float _tweenDuration = 0.4f;
 
     private Item[] _itemPrefabs;
     private Item[,] _items;
@@ -29,22 +24,23 @@ public class GameBoardController : MonoBehaviour
         _matchFinder = matchFinder;
     }
 
-    public void CreateGameBoard()
+    public Item[,] CreateGameBoard()
     {
         _items = new Item[_width, _height];
-        
+
         // Создаем игровое поле - сетку из префабов клеточек с элементами на ней
-        for(var x = 0; x < _width; x++)
+        for (var x = 0; x < _width; x++)
         {
             for (var y = 0; y < _height; y++)
             {
-                var tile = Instantiate(_tilePrefab, _tileHolder);
+                var tile = Instantiate(_tilePrefab, transform);
                 var tilePosition = new Vector2(x, y);
                 tile.transform.position = tilePosition;
             }
         }
-        
+
         FillGameBoard();
+        return _items;
     }
 
     /// <summary>
@@ -67,7 +63,7 @@ public class GameBoardController : MonoBehaviour
         // Выбираем случайный элемент
         var index = Random.Range(0, _itemPrefabs.Length);
         var item = _itemPrefabs[index];
-        
+
         // Пока есть совпадения типов элементов - генерируем новый индекс
         // Для того, чтобы на сгенерированной сетке не было элементов по 3 в ряд
         while (_matchFinder.HasMatchesWithPreviousItems(items, position, item))
@@ -75,13 +71,13 @@ public class GameBoardController : MonoBehaviour
             index = Random.Range(0, _itemPrefabs.Length);
             item = _itemPrefabs[index];
         }
-        
-        item = Instantiate(_itemPrefabs[index], _itemHolder);
+
+        item = Instantiate(_itemPrefabs[index], transform);
         item.transform.position = position;
 
         // Добавляем созданный элемент в массив
         items[(int)position.x, (int)position.y] = item;
-        
+
         item.Show(_tweenDuration);
     }
 }
