@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using DG.Tweening;
 
@@ -88,25 +89,41 @@ public class ItemMover : MonoBehaviour
         _isSwapping = true;
 
         SwapItems();
-        Debug.Log("Перемещаем обекты");
+
+        // Ждём завершения анимации обмена
         yield return new WaitForSeconds(_swapDuration);
 
-        bool matchFoundFirst = _matchFinder.HasMatchesAfterMove(_items, _firstItemPosition);
-        bool matchFoundSecond = _matchFinder.HasMatchesAfterMove(_items, _secondItemPosition);
+        // Список всех совпавших позиций
+        List<Vector2Int> matchedPositions = new List<Vector2Int>();
 
-        if (!matchFoundFirst && !matchFoundSecond)
+        // Проверяем совпадения на обеих позициях
+        matchedPositions.AddRange(_matchFinder.FindMatches(_items, _firstItemPosition));
+        matchedPositions.AddRange(_matchFinder.FindMatches(_items, _secondItemPosition));
+
+        // Убираем дублирующиеся позиции
+        matchedPositions = matchedPositions.Distinct().ToList();
+
+        if (matchedPositions.Count == 0)
         {
+            // Совпадений нет, возвращаем элементы на место
             SwapItems();
 
+            // Ждём завершения анимации возврата
             yield return new WaitForSeconds(_swapDuration);
             Debug.Log("Совпадений не найдено, элементы возвращены обратно.");
         }
         else
         {
+            // Совпадения найдены, обрабатываем их
             Debug.Log("Совпадения найдены, обрабатываем их.");
-            _matchFinder.HandleMatches(_items);
+
+            // Передаём список совпавших позиций для обработки
+            _matchFinder.HandleMatches(_items, matchedPositions);
+
+            // Дополнительная логика: падение элементов, заполнение новых и т.д.
         }
 
         _isSwapping = false;
     }
+
 }
