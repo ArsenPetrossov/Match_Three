@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -6,6 +9,7 @@ using Random = UnityEngine.Random;
 /// </summary>
 public class GameBoardController : MonoBehaviour
 {
+    public Action<Item[,]> ItemFellsDown;
     public float CellSize => _tilePrefab.transform.localScale.x;
 
     [SerializeField] private int _width;
@@ -79,6 +83,53 @@ public class GameBoardController : MonoBehaviour
         items[(int)position.x, (int)position.y] = item;
 
         item.Show(_tweenDuration);
+    }
+
+    public void KillMatched(List<Item> matchedItems )
+    {
+        var sequence = DOTween.Sequence();
+        
+        foreach (var item in matchedItems)
+        {
+            sequence.Join(item.Kill(_tweenDuration));
+        }
+        sequence.AppendInterval(_tweenDuration / 3);
+        sequence.OnComplete(MoveItemsDown);
+    }
+
+    public void MoveItemsDown()
+    {
+        var emptySlots = 0;
+
+        var sequence = DOTween.Sequence();
+        for (int x = 0; x < _width; x++)
+        {
+            
+            for (int y = 0; y < _height; y++)
+            {
+                if (_items[x, y] == null)
+                {
+                    emptySlots++;
+                }
+                else if (emptySlots > 0)
+                {
+                    var item = _items[x, y];
+                    var itemPosition = _items[x, y].transform.position;
+                   
+                    
+                    itemPosition.y -= emptySlots;
+                    sequence.Join(item.transform.DOMove(itemPosition, _tweenDuration));
+
+                    _items[x, y - emptySlots] = _items[x, y];
+                    _items[x, y] = null;
+                }
+                
+            }
+
+            emptySlots = 0;
+        }
+
+        sequence.OnComplete(() => ItemFellsDown?.Invoke(_items));
     }
 
     

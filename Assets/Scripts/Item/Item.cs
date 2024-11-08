@@ -18,13 +18,22 @@ public class Item : MonoBehaviour
         transform.DOScale(itemScale, tweenDuration);
     }
 
-    public void Move(Vector2Int position,float tweenDuration)
+    public Tween Move(Vector2Int position,float tweenDuration)
     {
-        transform.DOMove(new Vector3(position.x,position.y), tweenDuration);
+        var tween = transform.DOMove(new Vector3(position.x,position.y), tweenDuration);
+        return tween;
     }
 
-    public void Kill()
+    public Tween Kill(float tweenDuration)
     {
-        transform.DOScale(Vector3.zero, 0.5f).OnComplete(() => Destroy(gameObject));
+        var tween = transform.DOScale(0, tweenDuration)
+            .SetEase(Ease.InOutSine)
+            .OnComplete(() =>
+            {
+                // В конце анимации уничтожаем элемент
+                Destroy(gameObject);
+            });
+
+        return tween;
     }
 }

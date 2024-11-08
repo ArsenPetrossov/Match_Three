@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,8 @@ using DG.Tweening;
 
 public class ItemMover : MonoBehaviour
 {
+
+    public Action<Item[,]> ItemsSwapped;
     [SerializeField] private float _swapDuration = 0.5f;
 
     private Item[,] _items;
@@ -14,7 +17,7 @@ public class ItemMover : MonoBehaviour
     private Vector2Int _firstItemPosition;
     private Vector2Int _secondItemPosition;
     private MatchFinder _matchFinder;
-    private bool _isSwapping = false;
+    
 
     public void Initialize(Item[,] items, GameBoardIndexProvider gameBoardIndexProvider, MatchFinder matchFinder)
     {
@@ -25,8 +28,7 @@ public class ItemMover : MonoBehaviour
 
     private void Update()
     {
-        if (_isSwapping)
-            return;
+        
 
         if (Input.GetMouseButtonDown(0))
         {
@@ -39,7 +41,7 @@ public class ItemMover : MonoBehaviour
             
             if (AreItemsAdjacent(_firstItemPosition, _secondItemPosition))
             {
-                StartCoroutine(SwapAndCheck());
+                SwapItems();
             }
         }
     }
@@ -70,7 +72,11 @@ public class ItemMover : MonoBehaviour
         return xDifference + yDifference == 1;
     }
 
-    private void SwapItems()
+    public void ReSwapItems()
+    {
+        SwapItems(true);
+    }
+    private void SwapItems(bool isReSwap = false)
     {
         var firstItem = _items[_firstItemPosition.x, _firstItemPosition.y];
         var secondItem = _items[_secondItemPosition.x, _secondItemPosition.y];
@@ -80,13 +86,24 @@ public class ItemMover : MonoBehaviour
 
         _items[_firstItemPosition.x, _firstItemPosition.y] = secondItem;
         _items[_secondItemPosition.x, _secondItemPosition.y] = firstItem;
+        
+        var movingSequence = DOTween.Sequence();
+        movingSequence.Join(firstItem.Move(_secondItemPosition, _swapDuration));
+        movingSequence.Join(secondItem.Move(_firstItemPosition, _swapDuration));
+        movingSequence.OnComplete(() =>
+        {
+            if (!isReSwap)
+            {
+                ItemsSwapped?.Invoke(_items);
+            }
+        });
 
         (_firstItemPosition, _secondItemPosition) = (_secondItemPosition, _firstItemPosition);
     }
 
     private IEnumerator SwapAndCheck()
     {
-        _isSwapping = true;
+       
 
         SwapItems();
 
@@ -118,12 +135,12 @@ public class ItemMover : MonoBehaviour
             Debug.Log("Совпадения найдены, обрабатываем их.");
 
             // Передаём список совпавших позиций для обработки
-            _matchFinder.HandleMatches(_items, matchedPositions);
+            //_matchFinder.HandleMatches(_items, matchedPositions);
 
             // Дополнительная логика: падение элементов, заполнение новых и т.д.
         }
 
-        _isSwapping = false;
+        
     }
 
 }
