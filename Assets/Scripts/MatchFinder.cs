@@ -32,7 +32,70 @@ public class MatchFinder
         return false;
     }
 
-    public List<Vector2Int> FindMatches(Item[,] items, Vector2Int position)
+    public bool HasMatchesWithItemAround(Item[,] items, Vector2 position, Item itemToCheck)
+    {
+        int x = (int)position.x;
+        int y = (int)position.y;
+        ItemType itemType = itemToCheck.Type;
+
+        // Проверка по горизонтали влево
+        if (x >= 2)
+        {
+            if (items[x - 1, y]?.Type == itemType && items[x - 2, y]?.Type == itemType)
+            {
+                return true;
+            }
+        }
+
+        // Проверка по горизонтали вправо
+        if (x <= items.GetLength(0) - 3)
+        {
+            if (items[x + 1, y]?.Type == itemType && items[x + 2, y]?.Type == itemType)
+            {
+                return true;
+            }
+        }
+
+        // Проверка по вертикали вниз
+        if (y >= 2)
+        {
+            if (items[x, y - 1]?.Type == itemType && items[x, y - 2]?.Type == itemType)
+            {
+                return true;
+            }
+        }
+
+        // Проверка по вертикали вверх
+        if (y <= items.GetLength(1) - 3)
+        {
+            if (items[x, y + 1]?.Type == itemType && items[x, y + 2]?.Type == itemType)
+            {
+                return true;
+            }
+        }
+
+        // Проверка по горизонтали вокруг позиции
+        if (x >= 1 && x <= items.GetLength(0) - 2)
+        {
+            if (items[x - 1, y]?.Type == itemType && items[x + 1, y]?.Type == itemType)
+            {
+                return true;
+            }
+        }
+
+        // Проверка по вертикали вокруг позиции
+        if (y >= 1 && y <= items.GetLength(1) - 2)
+        {
+            if (items[x, y - 1]?.Type == itemType && items[x, y + 1]?.Type == itemType)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void FindMatches(Item[,] items, Vector2Int position)
     {
         List<Vector2Int> matchedPositions = new List<Vector2Int>();
         ItemType itemType = items[position.x, position.y].Type;
@@ -60,10 +123,10 @@ public class MatchFinder
             AddItemsToMatchesList(items, verticalMatches);
         }
 
-        matchedPositions = matchedPositions.Distinct().ToList();
+        
 
 
-        return matchedPositions;
+        
     }
 
     private List<Vector2Int> FindMatchesInDirection(Item[,] items, Vector2Int startPosition, ItemType itemType,

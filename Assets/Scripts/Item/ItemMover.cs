@@ -101,46 +101,6 @@ public class ItemMover : MonoBehaviour
         (_firstItemPosition, _secondItemPosition) = (_secondItemPosition, _firstItemPosition);
     }
 
-    private IEnumerator SwapAndCheck()
-    {
-       
-
-        SwapItems();
-
-        // Ждём завершения анимации обмена
-        yield return new WaitForSeconds(_swapDuration);
-
-        // Список всех совпавших позиций
-        List<Vector2Int> matchedPositions = new List<Vector2Int>();
-
-        // Проверяем совпадения на обеих позициях
-        matchedPositions.AddRange(_matchFinder.FindMatches(_items, _firstItemPosition));
-        matchedPositions.AddRange(_matchFinder.FindMatches(_items, _secondItemPosition));
-
-        // Убираем дублирующиеся позиции
-        matchedPositions = matchedPositions.Distinct().ToList();
-
-        if (matchedPositions.Count == 0)
-        {
-            // Совпадений нет, возвращаем элементы на место
-            SwapItems();
-
-            // Ждём завершения анимации возврата
-            yield return new WaitForSeconds(_swapDuration);
-            Debug.Log("Совпадений не найдено, элементы возвращены обратно.");
-        }
-        else
-        {
-            // Совпадения найдены, обрабатываем их
-            Debug.Log("Совпадения найдены, обрабатываем их.");
-
-            // Передаём список совпавших позиций для обработки
-            //_matchFinder.HandleMatches(_items, matchedPositions);
-
-            // Дополнительная логика: падение элементов, заполнение новых и т.д.
-        }
-
-        
-    }
+    
 
 }

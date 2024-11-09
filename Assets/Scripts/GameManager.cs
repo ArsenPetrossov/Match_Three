@@ -33,7 +33,19 @@ public class GameManager : MonoBehaviour
         {
             _gameBoardController.KillMatched(_matchFinder.Matches);
             
+            
         }
+        else
+        {
+            Debug.Log("Совпадений нет, заполняю клетки");
+            
+            _gameBoardController.FillEmptySlots();
+        }
+    }
+
+    private void OnHasEmptySlots()
+    {
+       _gameBoardController.FillEmptySlots();
     }
 
     private void OnItemSwapped(Item[,] items)

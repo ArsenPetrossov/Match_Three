@@ -85,14 +85,15 @@ public class GameBoardController : MonoBehaviour
         item.Show(_tweenDuration);
     }
 
-    public void KillMatched(List<Item> matchedItems )
+    public void KillMatched(List<Item> matchedItems)
     {
         var sequence = DOTween.Sequence();
-        
+
         foreach (var item in matchedItems)
         {
             sequence.Join(item.Kill(_tweenDuration));
         }
+
         sequence.AppendInterval(_tweenDuration / 3);
         sequence.OnComplete(MoveItemsDown);
     }
@@ -104,7 +105,6 @@ public class GameBoardController : MonoBehaviour
         var sequence = DOTween.Sequence();
         for (int x = 0; x < _width; x++)
         {
-            
             for (int y = 0; y < _height; y++)
             {
                 if (_items[x, y] == null)
@@ -115,15 +115,17 @@ public class GameBoardController : MonoBehaviour
                 {
                     var item = _items[x, y];
                     var itemPosition = _items[x, y].transform.position;
-                   
-                    
+
+
                     itemPosition.y -= emptySlots;
                     sequence.Join(item.transform.DOMove(itemPosition, _tweenDuration));
 
                     _items[x, y - emptySlots] = _items[x, y];
+                    
+                    Debug.Log("Добавляю пустую клетку в список");
+                    
                     _items[x, y] = null;
                 }
-                
             }
 
             emptySlots = 0;
@@ -132,5 +134,36 @@ public class GameBoardController : MonoBehaviour
         sequence.OnComplete(() => ItemFellsDown?.Invoke(_items));
     }
 
-    
+    private List<Vector2> GetEmptyPosition()
+    {
+        List<Vector2> emptyPositions = new();
+        for (int x = 0; x < _width; x++)
+        {
+            for (int y = 0; y < _height; y++)
+            {
+                if (_items[x, y] == null)
+                {
+                    emptyPositions.Add(new Vector2(x, y));
+                }
+            }
+        }
+
+        return emptyPositions;
+
+       
+    }
+
+    public void FillEmptySlots()
+    {
+        Debug.Log("Заполняю пустые клетки");
+        var positions = GetEmptyPosition();
+
+        foreach (var position in positions)
+        {
+            SpawnItem(_items, position);
+           
+        }
+
+        
+    }
 }
